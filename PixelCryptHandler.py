@@ -28,26 +28,40 @@ class PixelCrypt:
 
                 i +=1
 
-        randx = random.randint(0, 10000)
-        randy = random.randint(0, 10000)
+        randx1 = random.randint(0, 1000000)
+        randy1 = random.randint(0, 1000000)
 
-        offSetKey = [randx, randy]
+        randx2 = random.randint(0, 1000000)
+        randy2 = random.randint(0, 1000000)
 
-        new_img = img.offset(randx, randy)
+        randx3 = random.randint(0, 1000000)
+        randy3 = random.randint(0, 1000000)
 
-        new_img.save(fileName, "PNG")
+        keyList = [randx1, randy1, randx2, randy2, randx3, randy3]
 
-        return offSetKey
+        for i in range(0, len(keyList), 2):
+            img = img.offset(keyList[i], keyList[i + 1])
+
+        key = [0, 0, 0, 0, 0, 0]
+        count = 1
+
+        for i in keyList:
+            key[len(keyList) - count] = i
+            count += 1
 
 
-    def decrypt(self, fileName, key):
+        img.save(fileName, "PNG")
+
+
+        return key
+
+
+    def decrypt(self, fileName, keyList):
 
         img = Image.open(fileName)
 
-        xOff = key[0]
-        yOff = key[1]
-
-        new_img = img.offset(-xOff, -yOff)
+        for i in range(0, len(keyList), 2):
+            img = img.offset(-(keyList[i + 1]), -(keyList[i]))
 
         size = img.size
         bitList = ""
@@ -55,14 +69,13 @@ class PixelCrypt:
         for x in xrange(size[0]):
             for y in xrange(size[1]):
 
-                pixVal = new_img.getpixel((x, y))
+                pixVal = img.getpixel((x, y))
 
                 if(pixVal[0] == 0):
                     bitList += "0"
 
                 else:
                     bitList += "1"
-
 
         i = len(bitList) -1
 
